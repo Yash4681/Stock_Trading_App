@@ -1,0 +1,111 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Rotativa.AspNetCore;
+using Rotativa.AspNetCore.Options;
+using ServiceContracts;
+using ServiceContracts.DTO;
+using StocksAppWithXUnit.Models;
+using System.Threading.Tasks;
+
+namespace StocksAppWithXUnit.Controllers
+{
+    [Route("[controller]")]
+    public class TradeController : Controller
+    {
+        private readonly IFinnhubService _finnhubService;
+        private readonly IStocksService _stocksService;
+        private readonly TradingOptionsModel _options;
+        private readonly IConfiguration _configuration;
+
+        public TradeController(IFinnhubService finnhubService, IOptions<TradingOptionsModel> options, IConfiguration configuration, IStocksService stocksService)
+        {
+            _finnhubService = finnhubService;
+            _options = options.Value;
+            _configuration = configuration;
+            _stocksService = stocksService;
+        }
+
+        [Route("/")]
+        [Route("[action]")]
+        public async Task<IActionResult> Index()
+        {
+            Dictionary<string,object>? getStockPriceQuote = await _finnhubService.GetStockPriceQuote(_options.DefaultStockSymbol);
+            Dictionary<string,object>? getCompanyProfile = await _finnhubService.GetCompanyProfile(_options.DefaultStockSymbol);
+
+            StockTrade stockTrade = new StockTrade()
+            {
+                StockName = Convert.ToString(getCompanyProfile["name"]),
+                StockSymbol = _options.DefaultStockSymbol,
+                Price = Convert.ToDouble(Convert.ToString(getStockPriceQuote["c"])),
+                Quantity = Convert.ToUInt32(_options.DefaultOrderQuantity)
+            };
+
+            ViewBag.FinnhubToken = _configuration["FinnhubToken"];
+
+            return View(stockTrade);
+        }
+
+        [Route("[action]")]
+        public async Task<IActionResult> Orders()
+        {
+            Orders orders = new Orders()
+            {
+                BuyOrders = await _stocksService.GetAllBuyOrders(),
+                SellOrders = await _stocksService.GetAllSellOrders()
+            };
+            return View(orders);
+        }
+
+        [Route("[action]")]
+        public async Task<IActionResult> SellOrder(SellOrderRequest sellOrderRequest)
+        {
+            sellOrderRequest.DateAndTimeOfOrder = DateTime.Now;
+
+            ModelState.Clear();
+            TryValidateModel(sellOrderRequest);
+
+            if(!ModelState.IsValid)
+            {
+                ViewBag.Errors = ModelState.Values.SelectMany(temp => temp.Errors).Select(e => e.ErrorMessage).ToList();
+                StockTrade stockTrade = new StockTrade() { StockName = sellOrderRequest.StockName, StockSymbol = sellOrderRequest.StockSymbol, Price = sellOrderRequest.Price, Quantity = sellOrderRequest.Quantity };
+                return View("Index", stockTrade);
+            }
+            SellOrderResponse sellOrderResponse = await _stocksService.CreateSellOrder(sellOrderRequest);
+            return RedirectToAction("Orders", "Trade");
+        }
+
+        [Route("[action]")]
+        public async Task<IActionResult> BuyOrder(BuyOrderRequest buyOrderRequest)
+        {
+            buyOrderRequest.DateAndTimeOfOrder = DateTime.Now;
+
+            ModelState.Clear();
+            TryValidateModel(buyOrderRequest);
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Errors = ModelState.Values.SelectMany(temp => temp.Errors).Select(e => e.ErrorMessage).ToList();
+                StockTrade stockTrade = new StockTrade() { StockName = buyOrderRequest.StockName, StockSymbol = buyOrderRequest.StockSymbol, Price = buyOrderRequest.Price, Quantity = buyOrderRequest.Quantity };
+                return View("Index", stockTrade);
+            }
+            BuyOrderResponse buyOrderResponse = await _stocksService.CreateBuyOrder(buyOrderRequest);
+            return RedirectToAction("Orders", "Trade");
+        }
+
+        [Route("[action]")]
+        public async Task<IActionResult> OrdersPDF()
+        {
+            Orders orders = new Orders()
+            {
+                BuyOrders = await _stocksService.GetAllBuyOrders(),
+                SellOrders = await _stocksService.GetAllSellOrders(),
+            };
+
+            return new ViewAsPdf("OrdersPDF", orders, ViewData)
+            {
+                PageMargins = new Margins() { Bottom = 20, Left = 20, Right = 20, Top = 20 },
+                PageOrientation = Orientation.Landscape
+            };
+        }
+    }
+}
