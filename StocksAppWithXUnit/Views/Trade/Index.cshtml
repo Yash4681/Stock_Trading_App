@@ -5,6 +5,7 @@
 
 <nav class="navbar">
     <ul>
+        <li><a asp-controller="Stocks" asp-action="Explore">Explore</a></li>
         <li><a asp-controller="Trade" asp-action="Index" class="nav-active">Trade</a></li>
         <li><a asp-controller="Trade" asp-action="Orders">Orders</a></li>
     </ul>
@@ -19,9 +20,13 @@
         <div class="flex trading-panel-flex">
             <div id="stock-price-panel">
                 <div class="stock">
-                    <h3 class="stock-title">@Model.StockName (@Model.StockSymbol)</h3>
-                    <div class="stock-price"><span class="text-grey">$</span> <span class="price">@Model.Price</span></div>
+                    <h1 class="stock-title">@Model.StockName (@Model.StockSymbol)</h1>
+                    <h2 class="stock-price"><small class="text-grey">$</small> <span class="price">@Model.Price.ToString("N")</span></h2>
                 </div>
+                <div class="chart mt">
+                    <canvas id="stock-chart" width="400px" height="150px"></canvas>
+                </div>
+                <div class="date"></div>
             </div>
             <div id="new-order-panel">
                 <div class="flex flex-direction-vertical">

@@ -26,11 +26,16 @@ namespace StocksAppWithXUnit.Controllers
         }
 
         [Route("/")]
-        [Route("[action]")]
-        public async Task<IActionResult> Index()
+        [Route("[action]/{stockSymbol?}")]
+        public async Task<IActionResult> Index(string? stockSymbol)
         {
-            Dictionary<string,object>? getStockPriceQuote = await _finnhubService.GetStockPriceQuote(_options.DefaultStockSymbol);
-            Dictionary<string,object>? getCompanyProfile = await _finnhubService.GetCompanyProfile(_options.DefaultStockSymbol);
+            if(stockSymbol == null)
+            {
+                stockSymbol = _options.DefaultStockSymbol;
+            }
+
+            Dictionary<string,object>? getStockPriceQuote = await _finnhubService.GetStockPriceQuote(stockSymbol);
+            Dictionary<string,object>? getCompanyProfile = await _finnhubService.GetCompanyProfile(stockSymbol);
 
             StockTrade stockTrade = new StockTrade()
             {
