@@ -1,6 +1,7 @@
 ﻿using AutoFixture;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using ServiceContracts;
@@ -30,7 +31,9 @@ namespace StockAppUnitTest
             };
             var options = Options.Create(tradingOptions);
 
-            _stocksController = new StocksController(_finnhubService, options);
+            var loggerMock = new Mock<ILogger<StocksController>>();
+
+            _stocksController = new StocksController(_finnhubService, options, loggerMock.Object);
         }
 
         [Fact]
