@@ -7,13 +7,20 @@ namespace StocksAppWithXUnit.Components
     public class SelectedStockViewComponent : ViewComponent
     {
         private readonly IFinnhubService _finnhubService;
+        private readonly ILogger<SelectedStockViewComponent> _logger;
 
-        public SelectedStockViewComponent(IFinnhubService finnhubService)
+        public SelectedStockViewComponent(IFinnhubService finnhubService, ILogger<SelectedStockViewComponent> logger)
         {
             _finnhubService = finnhubService;
+            _logger = logger;
         }
         public async Task<IViewComponentResult> InvokeAsync(string? stockSymbol)
         {
+            _logger.LogInformation("SelectedStockViewComponent is called");
+            _logger.LogDebug($"stockSymbol: {stockSymbol}");
+
+            if (stockSymbol == null) return null;
+
             Dictionary<string, object>? profile = await _finnhubService.GetCompanyProfile(stockSymbol);
             Dictionary<string, object>? priceQuote = await _finnhubService.GetStockPriceQuote(stockSymbol);
 

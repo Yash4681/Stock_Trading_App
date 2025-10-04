@@ -3,11 +3,17 @@ using Microsoft.EntityFrameworkCore;
 using Repositories;
 using RepositoryContracts;
 using Rotativa.AspNetCore;
+using Serilog;
 using ServiceContracts;
 using Services;
 using StocksAppWithXUnit.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider services, LoggerConfiguration loggerConfiguration) =>
+{
+    loggerConfiguration.ReadFrom.Configuration(context.Configuration).ReadFrom.Services(services);
+});
 
 builder.Services.AddControllersWithViews();
 builder.Services.Configure<TradingOptionsModel>(builder.Configuration.GetSection("TradingOptions"));

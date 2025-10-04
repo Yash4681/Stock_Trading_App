@@ -1,6 +1,7 @@
 using AutoFixture;
 using Entities;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using RepositoryContracts;
 using ServiceContracts;
@@ -25,7 +26,9 @@ namespace StockAppUnitTest
             _stocksRepositoryMock = new Mock<IStocksRepository>();
             _stocksRepository = _stocksRepositoryMock.Object;
 
-            _stocksService = new StocksService(_stocksRepository);
+            var loggerMock = new Mock<ILogger<StocksService>>();
+
+            _stocksService = new StocksService(_stocksRepository, loggerMock.Object);
         }
 
         #region CreateBuyOrder

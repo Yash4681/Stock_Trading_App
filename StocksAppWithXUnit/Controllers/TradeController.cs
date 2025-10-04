@@ -16,20 +16,25 @@ namespace StocksAppWithXUnit.Controllers
         private readonly IStocksService _stocksService;
         private readonly TradingOptionsModel _options;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<TradeController> _logger;
 
-        public TradeController(IFinnhubService finnhubService, IOptions<TradingOptionsModel> options, IConfiguration configuration, IStocksService stocksService)
+        public TradeController(IFinnhubService finnhubService, IOptions<TradingOptionsModel> options, IConfiguration configuration, IStocksService stocksService, ILogger<TradeController> logger)
         {
             _finnhubService = finnhubService;
             _options = options.Value;
             _configuration = configuration;
             _stocksService = stocksService;
+            _logger = logger;
         }
 
         [Route("/")]
         [Route("[action]/{stockSymbol?}")]
         public async Task<IActionResult> Index(string? stockSymbol)
         {
-            if(stockSymbol == null)
+            _logger.LogInformation("Index method is called from TradeController");
+            _logger.LogDebug($"stockSymbol: {stockSymbol}");
+
+            if (stockSymbol == null)
             {
                 stockSymbol = _options.DefaultStockSymbol;
             }
@@ -53,6 +58,8 @@ namespace StocksAppWithXUnit.Controllers
         [Route("[action]")]
         public async Task<IActionResult> Orders()
         {
+            _logger.LogInformation("Orders method is called from TradeController");
+
             Orders orders = new Orders()
             {
                 BuyOrders = await _stocksService.GetAllBuyOrders(),
@@ -64,6 +71,9 @@ namespace StocksAppWithXUnit.Controllers
         [Route("[action]")]
         public async Task<IActionResult> SellOrder(SellOrderRequest sellOrderRequest)
         {
+            _logger.LogInformation("SellOrder method is called from TradeController");
+            _logger.LogDebug($"sellOrderRequest: {sellOrderRequest}");
+
             sellOrderRequest.DateAndTimeOfOrder = DateTime.Now;
 
             ModelState.Clear();
@@ -82,6 +92,9 @@ namespace StocksAppWithXUnit.Controllers
         [Route("[action]")]
         public async Task<IActionResult> BuyOrder(BuyOrderRequest buyOrderRequest)
         {
+            _logger.LogInformation("BuyOrder method is called from TradeController");
+            _logger.LogDebug($"buyOrderRequest: {buyOrderRequest}");
+
             buyOrderRequest.DateAndTimeOfOrder = DateTime.Now;
 
             ModelState.Clear();
@@ -100,6 +113,8 @@ namespace StocksAppWithXUnit.Controllers
         [Route("[action]")]
         public async Task<IActionResult> OrdersPDF()
         {
+            _logger.LogInformation("OrdersPDF method is called from TradeController");
+
             Orders orders = new Orders()
             {
                 BuyOrders = await _stocksService.GetAllBuyOrders(),

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using RepositoryContracts;
 using System.Text.Json;
 
@@ -9,16 +10,21 @@ namespace Repositories
         private readonly HttpClient _client;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<FinnhubRepository> _logger;
 
-        public FinnhubRepository(IHttpClientFactory clientFactory, IConfiguration configuration)
+        public FinnhubRepository(IHttpClientFactory clientFactory, IConfiguration configuration, ILogger<FinnhubRepository> logger)
         {
             _httpClientFactory = clientFactory;
             _client = _httpClientFactory.CreateClient();
             _configuration = configuration;
+            _logger = logger;
         }
 
         public async Task<Dictionary<string, object>?> GetCompanyProfile(string stockSymbol)
         {
+            _logger.LogInformation("GetCompanyProfile method is called from FinnhubRepository");
+            _logger.LogDebug($"stockSymbol: {stockSymbol}");
+
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage()
             {
                 Method = HttpMethod.Get,
@@ -36,6 +42,9 @@ namespace Repositories
 
         public async Task<Dictionary<string, object>?> GetStockPriceQuote(string stockSymbol)
         {
+            _logger.LogInformation("GetStockPriceQuote method is called from FinnhubRepository");
+            _logger.LogDebug($"stockSymbol: {stockSymbol}");
+
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage()
             {
                 Method = HttpMethod.Get,
@@ -53,6 +62,8 @@ namespace Repositories
 
         public async Task<List<Dictionary<string, string>>?> GetStocks()
         {
+            _logger.LogInformation("GetStocks method is called from FinnhubRepository");
+
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage()
             {
                 Method = HttpMethod.Get,
@@ -70,6 +81,8 @@ namespace Repositories
 
         public async Task<Dictionary<string, object>?> SearchStocks(string stockSymbolToSearch)
         {
+            _logger.LogInformation("SearchStocks method is called from FinnhubRepository");
+            _logger.LogDebug($"stockSymbolToSearch: {stockSymbolToSearch}");
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage()
             {
                 Method = HttpMethod.Get,
