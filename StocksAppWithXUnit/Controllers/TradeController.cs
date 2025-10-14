@@ -4,6 +4,7 @@ using Rotativa.AspNetCore;
 using Rotativa.AspNetCore.Options;
 using ServiceContracts;
 using ServiceContracts.DTO;
+using StocksAppWithXUnit.Filters.ActionFilters;
 using StocksAppWithXUnit.Models;
 using System.Threading.Tasks;
 
@@ -69,44 +70,26 @@ namespace StocksAppWithXUnit.Controllers
         }
 
         [Route("[action]")]
-        public async Task<IActionResult> SellOrder(SellOrderRequest sellOrderRequest)
+        [TypeFilter(typeof(CreateOrderActionFilter))]
+        public async Task<IActionResult> SellOrder(SellOrderRequest orderRequest)
         {
             _logger.LogInformation("SellOrder method is called from TradeController");
-            _logger.LogDebug($"sellOrderRequest: {sellOrderRequest}");
+            _logger.LogDebug($"sellOrderRequest: {orderRequest}");
 
-            sellOrderRequest.DateAndTimeOfOrder = DateTime.Now;
+            SellOrderResponse sellOrderResponse = await _stocksService.CreateSellOrder(orderRequest);
 
-            ModelState.Clear();
-            TryValidateModel(sellOrderRequest);
-
-            if(!ModelState.IsValid)
-            {
-                ViewBag.Errors = ModelState.Values.SelectMany(temp => temp.Errors).Select(e => e.ErrorMessage).ToList();
-                StockTrade stockTrade = new StockTrade() { StockName = sellOrderRequest.StockName, StockSymbol = sellOrderRequest.StockSymbol, Price = sellOrderRequest.Price, Quantity = sellOrderRequest.Quantity };
-                return View("Index", stockTrade);
-            }
-            SellOrderResponse sellOrderResponse = await _stocksService.CreateSellOrder(sellOrderRequest);
             return RedirectToAction("Orders", "Trade");
         }
 
         [Route("[action]")]
-        public async Task<IActionResult> BuyOrder(BuyOrderRequest buyOrderRequest)
+        [TypeFilter(typeof(CreateOrderActionFilter))]
+        public async Task<IActionResult> BuyOrder(BuyOrderRequest orderRequest)
         {
             _logger.LogInformation("BuyOrder method is called from TradeController");
-            _logger.LogDebug($"buyOrderRequest: {buyOrderRequest}");
+            _logger.LogDebug($"buyOrderRequest: {orderRequest}");
+            
+            BuyOrderResponse buyOrderResponse = await _stocksService.CreateBuyOrder(orderRequest);
 
-            buyOrderRequest.DateAndTimeOfOrder = DateTime.Now;
-
-            ModelState.Clear();
-            TryValidateModel(buyOrderRequest);
-
-            if (!ModelState.IsValid)
-            {
-                ViewBag.Errors = ModelState.Values.SelectMany(temp => temp.Errors).Select(e => e.ErrorMessage).ToList();
-                StockTrade stockTrade = new StockTrade() { StockName = buyOrderRequest.StockName, StockSymbol = buyOrderRequest.StockSymbol, Price = buyOrderRequest.Price, Quantity = buyOrderRequest.Quantity };
-                return View("Index", stockTrade);
-            }
-            BuyOrderResponse buyOrderResponse = await _stocksService.CreateBuyOrder(buyOrderRequest);
             return RedirectToAction("Orders", "Trade");
         }
 

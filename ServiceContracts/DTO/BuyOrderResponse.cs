@@ -2,7 +2,7 @@
 
 namespace ServiceContracts.DTO
 {
-    public class BuyOrderResponse
+    public class BuyOrderResponse : IOrderResponse
     {
         public Guid? BuyOrderID { get; set; }
         public string? StockSymbol { get; set; }
@@ -16,6 +16,8 @@ namespace ServiceContracts.DTO
         public double Price { get; set; }
 
         public double TradeAmount { get; set; }
+
+        public OrderType OrderType => OrderType.BuyOrder;
 
         public override bool Equals(object? obj)
         {
