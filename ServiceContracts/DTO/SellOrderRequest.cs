@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ServiceContracts.DTO
 {
-    public class SellOrderRequest
+    public class SellOrderRequest : IOrderRequest
     {
         [Required(ErrorMessage = "Stock Symbol can't be blank")]
         public string? StockSymbol { get; set; }
