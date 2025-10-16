@@ -6,6 +6,7 @@ using Rotativa.AspNetCore;
 using Serilog;
 using ServiceContracts;
 using Services;
+using StocksAppWithXUnit.Middlewares;
 using StocksAppWithXUnit.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +31,17 @@ if(builder.Environment.IsEnvironment("Test") == false)
     });
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseExceptionHandlingMiddleware();
+}
+    
 
 if (builder.Environment.IsEnvironment("Test") == false)
     RotativaConfiguration.Setup("wwwroot", wkhtmltopdfRelativePath: "Rotativa");
