@@ -1,5 +1,4 @@
 ﻿using Entities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RepositoryContracts;
 using ServiceContracts;
@@ -8,12 +7,12 @@ using Services.Helpers;
 
 namespace Services
 {
-    public class StocksService : IStocksService
+    public class StocksCreaterService : IStocksCreaterService
     {
         private readonly IStocksRepository _stocksRepository;
-        private readonly ILogger<StocksService> _logger;
+        private readonly ILogger<StocksCreaterService> _logger;
 
-        public StocksService(IStocksRepository stocksRepository, ILogger<StocksService> logger)
+        public StocksCreaterService(IStocksRepository stocksRepository, ILogger<StocksCreaterService> logger)
         {
             _stocksRepository = stocksRepository;
             _logger = logger;
@@ -51,22 +50,6 @@ namespace Services
             await _stocksRepository.CreateSellOrder(sellOrder);
 
             return sellOrder.ToSellOrderResponse();
-        }
-
-        public async Task<List<BuyOrderResponse>> GetAllBuyOrders()
-        {
-            _logger.LogInformation("GetAllBuyOrders method is called from StocksService");
-
-            List<BuyOrder> buyOrders = await _stocksRepository.GetBuyOrders();
-            return buyOrders.Select(temp => temp.ToBuyOrderResponse()).ToList();
-        }
-
-        public async Task<List<SellOrderResponse>> GetAllSellOrders()
-        {
-            _logger.LogInformation("GetAllSellOrders method is called from StocksService");
-
-            List<SellOrder> sellOrders = await _stocksRepository.GetSellOrders();
-            return sellOrders.Select(temp => temp.ToSellOrderResponse()).ToList();
         }
     }
 }

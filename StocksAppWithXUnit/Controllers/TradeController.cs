@@ -14,18 +14,20 @@ namespace StocksAppWithXUnit.Controllers
     public class TradeController : Controller
     {
         private readonly IFinnhubService _finnhubService;
-        private readonly IStocksService _stocksService;
+        private readonly IStocksGetterService _stocksGetterService;
+        private readonly IStocksCreaterService _stocksCreaterService;
         private readonly TradingOptionsModel _options;
         private readonly IConfiguration _configuration;
         private readonly ILogger<TradeController> _logger;
 
-        public TradeController(IFinnhubService finnhubService, IOptions<TradingOptionsModel> options, IConfiguration configuration, IStocksService stocksService, ILogger<TradeController> logger)
+        public TradeController(IFinnhubService finnhubService, IOptions<TradingOptionsModel> options, IConfiguration configuration, IStocksGetterService stocksGetterService, IStocksCreaterService stocksCreaterService, ILogger<TradeController> logger)
         {
             _finnhubService = finnhubService;
             _options = options.Value;
             _configuration = configuration;
-            _stocksService = stocksService;
+            _stocksGetterService = stocksGetterService;
             _logger = logger;
+            _stocksCreaterService = stocksCreaterService;
         }
 
         [Route("/")]
@@ -63,8 +65,8 @@ namespace StocksAppWithXUnit.Controllers
 
             Orders orders = new Orders()
             {
-                BuyOrders = await _stocksService.GetAllBuyOrders(),
-                SellOrders = await _stocksService.GetAllSellOrders()
+                BuyOrders = await _stocksGetterService.GetAllBuyOrders(),
+                SellOrders = await _stocksGetterService.GetAllSellOrders()
             };
             return View(orders);
         }
@@ -76,7 +78,7 @@ namespace StocksAppWithXUnit.Controllers
             _logger.LogInformation("SellOrder method is called from TradeController");
             _logger.LogDebug($"sellOrderRequest: {orderRequest}");
 
-            SellOrderResponse sellOrderResponse = await _stocksService.CreateSellOrder(orderRequest);
+            SellOrderResponse sellOrderResponse = await _stocksCreaterService.CreateSellOrder(orderRequest);
 
             return RedirectToAction("Orders", "Trade");
         }
@@ -88,7 +90,7 @@ namespace StocksAppWithXUnit.Controllers
             _logger.LogInformation("BuyOrder method is called from TradeController");
             _logger.LogDebug($"buyOrderRequest: {orderRequest}");
             
-            BuyOrderResponse buyOrderResponse = await _stocksService.CreateBuyOrder(orderRequest);
+            BuyOrderResponse buyOrderResponse = await _stocksCreaterService.CreateBuyOrder(orderRequest);
 
             return RedirectToAction("Orders", "Trade");
         }
@@ -100,8 +102,8 @@ namespace StocksAppWithXUnit.Controllers
 
             Orders orders = new Orders()
             {
-                BuyOrders = await _stocksService.GetAllBuyOrders(),
-                SellOrders = await _stocksService.GetAllSellOrders(),
+                BuyOrders = await _stocksGetterService.GetAllBuyOrders(),
+                SellOrders = await _stocksGetterService.GetAllSellOrders(),
             };
 
             return new ViewAsPdf("OrdersPDF", orders, ViewData)
