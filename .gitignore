@@ -361,3 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Ignore all EXE files
+*.exe
+
+# Specifically ignore Rotativa binaries
+StocksManager.UI/wwwroot/Rotativa/
